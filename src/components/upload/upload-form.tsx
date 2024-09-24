@@ -1,6 +1,6 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useState } from "react";
 
 import { z } from "zod";
 
@@ -24,6 +24,8 @@ import { uploadSchema } from "@/schemas/upload-schema";
 type UploadFormProps = {};
 
 const UploadForm: FC<UploadFormProps> = ({}) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const form = useForm<z.infer<typeof uploadSchema>>({
     resolver: zodResolver(uploadSchema),
     defaultValues: {
@@ -33,17 +35,20 @@ const UploadForm: FC<UploadFormProps> = ({}) => {
 
   const fileRef = form.register("file");
 
-  // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof uploadSchema>) {
     const formData = new FormData();
 
     formData.append("file", values.file[0]);
     formData.append("text", values.text);
 
+    setIsLoading(true);
+
     const response = await fetch("/api/upload", {
       method: "POST",
       body: formData,
     });
+
+    setIsLoading(false);
 
     if (!response.ok) {
       throw new Error("Failed to upload file");
@@ -60,7 +65,7 @@ const UploadForm: FC<UploadFormProps> = ({}) => {
             <FormItem>
               <FormLabel>Text</FormLabel>
               <FormControl>
-                <Input onChange={field.onChange} />
+                <Input disabled={isLoading} onChange={field.onChange} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -73,13 +78,20 @@ const UploadForm: FC<UploadFormProps> = ({}) => {
             <FormItem>
               <FormLabel>File</FormLabel>
               <FormControl>
-                <Input type="file" accept="image/*" {...fileRef} />
+                <Input
+                  disabled={isLoading}
+                  type="file"
+                  accept="image/*"
+                  {...fileRef}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit" disabled={isLoading}>
+          Submit
+        </Button>
       </form>
     </Form>
   );
