@@ -1,15 +1,26 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
-type AuthButtonProps = {};
+type AuthButtonProps = {
+  authLink: string;
+  codeVerifier: string;
+};
 
-const AuthButton: FC<AuthButtonProps> = ({}) => {
+const AuthButton: FC<AuthButtonProps> = ({ authLink, codeVerifier }) => {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    document.cookie = `codeVerifier=${codeVerifier}`;
+
+    setIsLoading(false);
+  }, [codeVerifier]);
+
   return (
-    <Button asChild>
-      <a href="/api/auth/twitter" target="_blank">
+    <Button asChild disabled={isLoading}>
+      <a href={authLink} target="_blank">
         Sign In
       </a>
     </Button>
