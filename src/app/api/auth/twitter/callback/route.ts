@@ -5,7 +5,7 @@ import { callbackListener, twitterClient } from "@/lib/twitter";
 import { TWITTER_AUTH_REDIRECT_URL } from "@/helpers/twitter";
 
 export const GET = async (req: NextRequest) => {
-  const { pathname, origin } = req.nextUrl;
+  const { origin } = req.nextUrl;
 
   const searchParams = req.nextUrl.searchParams;
 
