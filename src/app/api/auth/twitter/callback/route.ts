@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
-import { callbackListener, twitterClient } from "@/lib/twitter";
+import { twitterClient } from "@/lib/twitter";
 
 import { TWITTER_AUTH_REDIRECT_URL } from "@/helpers/twitter";
 
@@ -11,15 +12,24 @@ export const GET = async (req: NextRequest) => {
 
   const code = searchParams.get("code")!;
 
+  const codeVerifier = cookies().get("codeVerifier")?.value;
+
+  if (!codeVerifier)
+    return NextResponse.json(
+      { error: "Code verifier not found" },
+      { status: 400 }
+    );
+
   try {
     const { accessToken } = await twitterClient.loginWithOAuth2({
       code,
-      codeVerifier: callbackListener.codeVerifier,
+      codeVerifier,
       redirectUri: TWITTER_AUTH_REDIRECT_URL,
     });
 
     const response = NextResponse.redirect(`${origin}/upload`, { status: 308 });
 
+    response.cookies.delete("codeVerifier");
     response.cookies.set("twitterAccessToken", accessToken);
 
     return response;

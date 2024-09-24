@@ -1,19 +1,15 @@
 import "server-only";
 
-import { IOAuth2RequestTokenResult, TwitterApi } from "twitter-api-v2";
-
-import { TWITTER_AUTH_REDIRECT_URL } from "@/helpers/twitter";
+import { TwitterApi } from "twitter-api-v2";
 
 declare global {
   // eslint-disable-next-line no-var, no-unused-vars
   var cachedTwitterClient: TwitterApi;
   var cachedTwitterUploaderClient: TwitterApi;
-  var cachedCallbackListener: IOAuth2RequestTokenResult;
 }
 
 export let twitterClient: TwitterApi;
 export let twitterUploaderClient: TwitterApi;
-export let callbackListener: IOAuth2RequestTokenResult;
 
 if (process.env.NODE_ENV === "production") {
   twitterClient = new TwitterApi({
@@ -27,13 +23,6 @@ if (process.env.NODE_ENV === "production") {
     accessToken: process.env.X_ACCESS_TOKEN!,
     accessSecret: process.env.X_ACCESS_SECRET!,
   });
-
-  callbackListener = twitterClient.generateOAuth2AuthLink(
-    TWITTER_AUTH_REDIRECT_URL,
-    {
-      scope: ["tweet.read", "tweet.write", "users.read"],
-    }
-  );
 } else {
   if (!global.cachedTwitterClient)
     global.cachedTwitterClient = new TwitterApi({
@@ -49,16 +38,6 @@ if (process.env.NODE_ENV === "production") {
       accessSecret: process.env.X_ACCESS_SECRET!,
     });
 
-  if (!global.cachedCallbackListener && global.cachedTwitterClient)
-    global.cachedCallbackListener =
-      global.cachedTwitterClient.generateOAuth2AuthLink(
-        TWITTER_AUTH_REDIRECT_URL,
-        {
-          scope: ["tweet.read", "tweet.write", "users.read"],
-        }
-      );
-
   twitterClient = global.cachedTwitterClient;
   twitterUploaderClient = global.cachedTwitterUploaderClient;
-  callbackListener = global.cachedCallbackListener;
 }
