@@ -10,7 +10,7 @@ const AuthButton: FC<AuthButtonProps> = ({}) => {
   return (
     <Button asChild>
       <a href="/api/auth/twitter" target="_blank">
-        My Link
+        Sign In
       </a>
     </Button>
   );
